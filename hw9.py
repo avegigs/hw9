@@ -1,7 +1,5 @@
 USERS = {}
 
-# decorator
-
 
 def error_handler(func):
     def inner(*args):
@@ -17,34 +15,28 @@ def error_handler(func):
     return inner
 
 
-def hello_user(_):
+def hello_user():
     return "How can I help you?"
 
 
-def unknown_command(_):
+def unknown_command():
     return "unknown_command"
 
 
-def exit(_):
-    return
-
-
 @error_handler
-def add_user(args):
-    name, phone = args
+def add_user(name, phone):
     USERS[name] = phone
     return f'User {name} added!'
 
 
 @error_handler
-def change_phone(args):
-    name, phone = args
+def change_phone(name, phone):
     old_phone = USERS[name]
     USERS[name] = phone
     return f'У {name} тепер телефон: {phone} Старий номер: {old_phone}'
 
 
-def show_all(_):
+def show_all():
     result = ''
     for name, phone in USERS.items():
         result += f'Name: {name} phone: {phone}\n'
@@ -52,9 +44,7 @@ def show_all(_):
 
 
 @error_handler
-def show_phone(args):
-    name, *_ = args
-    # print(name)
+def show_phone(name):
     phone = USERS[name]
     result = f'Phone: {phone} for user: {name}\n'
     return result
@@ -64,37 +54,29 @@ HANDLERS = {
     'hello': hello_user,
     'add': add_user,
     'change': change_phone,
-    'show all': show_all,
+    'show': show_all,
     'phone': show_phone,
-    'exit': exit,
-    'goodbye': exit,
-    'close': exit,
 }
-
-
-def parse_input(user_input):
-    command, *args = user_input.split()
-    command = command.lstrip()
-
-    try:
-        handler = HANDLERS[command.lower()]
-    except KeyError:
-        if args:
-            command = command + ' ' + args[0]
-            args = args[1:]
-        handler = HANDLERS.get(command.lower(), unknown_command)
-    return handler, args
 
 
 def main():
     while True:
-        # example: add Petro 0991234567
-        user_input = input('Please enter command and args: ')
-        handler, *args = parse_input(user_input)
-        result = handler(*args)
-        if not result:
-            print('Exit')
+        command, *data = input('Please enter command: ').strip().split(' ', 1)
+        
+        if command in ["goodbye", "close", "exit"]:
+            print("Good bye!")
             break
+        
+        if HANDLERS.get(command):
+            handler = HANDLERS.get(command)
+            if data:
+                data = data[0].split(' ')
+                
+            result = handler(*data)
+
+        else:
+            result = unknown_command()
+
         print(result)
 
 
